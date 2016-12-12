@@ -1,11 +1,11 @@
 package eventstore
 
 type EventStore interface {
-	CreateNewStream()
-	AppendEventsToStream()
-	GetStream()
-	AddSnapshot()
-	GetLatestSnapshot()
+	CreateNewStream(streamName string, changes []interface{})
+	AppendEventsToStream(streamName string, changes []interface{}, expectedVersion int) error
+	GetStream(streamName string, fromVersion int, toVersion int) ([]interface{}, error)
+	AddSnapshot(streamName string, snapShot interface{})
+	GetLatestSnapshot(streamName string) (interface{}, error)
 }
 
 func AddEventSource(eventSource *EventSource) {

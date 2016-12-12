@@ -2,66 +2,48 @@ package eventstore
 
 import (
 	"fmt"
+
+	"github.com/twinj/uuid"
 )
 
-// type DomainEvent struct {
-// }
-
-type EventSourcedAggregate struct {
-	changes []interface{}
-	version int
+type ResizeMessage struct {
+	Source      string `json:"source,omitempty"`
+	Destination string `json:"destination,omitempty"`
+	Size        string `json:"size,omitempty"`
 }
-
-func NewEventSourcedAggregate() *EventSourcedAggregate {
-	return &EventSourcedAggregate{
-		changes: make([]interface{}, 0, 5),
-		version: 0,
-	}
-}
-
-func (this *EventSourcedAggregate) Version() int {
-	return this.version
-}
-
-func (this *EventSourcedAggregate) Changes() []interface{} {
-	return this.changes
-}
-
-func (this *EventSourcedAggregate) Apply(aggregate interface{}, change interface{}) {
-	fmt.Println("EventSourcedAggregate!Apply")
-	// this.changes = append(this.changes, change)
-	fmt.Printf("Aggregate: %T\n", aggregate)
-	fmt.Printf("Event: %T\n", change)
-	this.version++
-}
-
-// ************************************************
 
 type CreditAdded struct {
+	Amount int `json:"amount,omitempty"`
 }
 
 type PhoneCallCharged struct {
+	Minutes int `json:"minutes,omitempty"`
 }
 
 type PayAsYouGoAccount struct {
+	ID string
 	*EventSourcedAggregate
 }
 
 func NewPayAsYouGoAccount() *PayAsYouGoAccount {
 	return &PayAsYouGoAccount{
+		uuid.NewV4().String(),
 		NewEventSourcedAggregate(),
 	}
 }
 
 func (this *PayAsYouGoAccount) Apply(change interface{}) {
-	fmt.Println("PayAsYouGoAccount!Apply")
 	this.EventSourcedAggregate.Apply(this, change)
 }
 
-func (this *PayAsYouGoAccount) whenCreditAdded(creditAdded CreditAdded) {
-	fmt.Println("PayAsYouGoAccount!whenCreditAdded")
+func (this *PayAsYouGoAccount) TopUp(credit int) {
+	this.EventSourcedAggregate.Causes(this, CreditAdded{credit})
 }
 
-func (this *PayAsYouGoAccount) whenPhoneCallCharged(phoneCallCharged PayAsYouGoAccount) {
-	fmt.Println("PayAsYouGoAccount!whenPhoneCallCharged")
+func (this *PayAsYouGoAccount) WhenCreditAdded(creditAdded CreditAdded) {
+	fmt.Println("PayAsYouGoAccount!WhenCreditAdded")
+}
+
+func (this *PayAsYouGoAccount) WhenPhoneCallCharged(phoneCallCharged PhoneCallCharged) {
+	fmt.Println("PayAsYouGoAccount!WhenPhoneCallCharged")
 }
