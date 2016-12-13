@@ -1,16 +1,28 @@
 package eventstore
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/twinj/uuid"
 )
 
 func TestAddEventSource(t *testing.T) {
 	RegisterTestingT(t)
 
-	eventSource := NewEventSource("SomeEventHappened", 1)
-	AddEventSource(eventSource)
+	streamName := fmt.Sprintf("%s-%s", "PayAsYouGoAccount", uuid.NewV4().String())
+	fmt.Println(streamName)
+	events := []interface{}{
+		CreditAdded{5},
+		PhoneCallCharged{20},
+	}
+
+	eventStore := NewPostgresEventStore()
+	eventStore.CreateNewStream(streamName, events)
+
+	// eventSource := NewEventSource("SomeEventHappened", 1)
+	// AddEventSource(eventSource)
 
 	// Send register request
 	// req, err := http.NewRequest("POST", "/api/v1/file/sync", strings.NewReader(body))

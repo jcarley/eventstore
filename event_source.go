@@ -1,23 +1,43 @@
 package eventstore
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/twinj/uuid"
 )
 
 type EventSource struct {
-	ID         string
-	SourceType string
-	Version    int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID         string    `json:"id"`
+	SourceType string    `json:"sourceType"`
+	Version    int       `json:"version"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
-func NewEventSource(sourceType string, version int) *EventSource {
+func NewEventSource(sourceType string) *EventSource {
 	return &EventSource{
-		ID:         uuid.NewV4().String(),
 		SourceType: sourceType,
-		Version:    version,
+	}
+}
+
+func (this *EventSource) RegisterEvent(event interface{}) *EventWrapper {
+	this.Version++
+	return NewEventWrapper(event, this.Version, this.ID)
+}
+
+// **************************************************
+
+type EventWrapper struct {
+	ID            string      `json:"id"`
+	Event         interface{} `json:"event"`
+	EventSourceId string      `json:"eventSourceId"`
+	EventNumber   int         `json:"eventNumber"`
+}
+
+func NewEventWrapper(event interface{}, eventNumber int, streamStateId string) *EventWrapper {
+	return &EventWrapper{
+		Event:         event,
+		EventNumber:   eventNumber,
+		EventSourceId: streamStateId,
+		ID:            fmt.Sprintf("%s-%s", streamStateId, eventNumber),
 	}
 }

@@ -26,8 +26,8 @@ func GetDB() *sql.DB {
 	return db
 }
 
-func DbTime() (createdAt string, updatedAt string) {
-	newTime := time.Now().UTC().Format(time.RFC3339)
+func DbTime() (createdAt time.Time, updatedAt time.Time) {
+	newTime := time.Now().UTC()
 	createdAt = newTime
 	updatedAt = newTime
 	return
