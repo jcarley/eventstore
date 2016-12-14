@@ -1,28 +1,29 @@
 package eventstore
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 var (
-	db *sql.DB
+	db *sqlx.DB
 )
 
 func init() {
 	ipAddress := "localhost"
 	connectionString := fmt.Sprintf("postgres://admin:password@%s/eventstore_dev?sslmode=disable", ipAddress)
-	connection, err := sql.Open("postgres", connectionString)
+	// connection, err := sql.Open("postgres", connectionString)
+	connection, err := sqlx.Connect("postgres", connectionString)
 	if err != nil {
 		panic(err)
 	}
 	db = connection
 }
 
-func GetDB() *sql.DB {
+func GetDB() *sqlx.DB {
 	return db
 }
 

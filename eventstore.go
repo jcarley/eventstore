@@ -7,9 +7,9 @@ import (
 )
 
 type EventStore interface {
-	CreateNewStream(streamName string, changes []interface{})
-	AppendEventsToStream(streamName string, changes []interface{}, expectedVersion int) error
-	GetStream(streamName string, fromVersion int, toVersion int) ([]interface{}, error)
+	CreateNewStream(streamName string, events []DomainEvent)
+	AppendEventsToStream(streamName string, events []DomainEvent, expectedVersion int) error
+	GetStream(streamName string, fromVersion int, toVersion int) ([]DomainEvent, error)
 	AddSnapshot(streamName string, snapShot interface{})
 	GetLatestSnapshot(streamName string) (interface{}, error)
 }
@@ -21,7 +21,7 @@ func NewPostgresEventStore() *PostgresEventStore {
 	return &PostgresEventStore{}
 }
 
-func (this *PostgresEventStore) CreateNewStream(streamName string, events []interface{}) {
+func (this *PostgresEventStore) CreateNewStream(streamName string, events []DomainEvent) {
 	eventSource := NewEventSource(streamName)
 	eventSource.ID = uuid.NewV4().String()
 	eventSource.Version = 0
@@ -35,13 +35,32 @@ func (this *PostgresEventStore) CreateNewStream(streamName string, events []inte
 	this.AppendEventsToStream(streamName, events, 0)
 }
 
-func (this *PostgresEventStore) AppendEventsToStream(streamName string, events []interface{}, expectedVersion int) error {
+func (this *PostgresEventStore) AppendEventsToStream(streamName string, events []DomainEvent, expectedVersion int) error {
 
-	eventSource := this.getEventSourceByStreamName(streamName)
+	eventSource, err := this.getEventSourceByStreamName(streamName)
+	if err != nil {
+		return err
+	}
 
 	for _, event := range events {
 		this.saveEvent(event, eventSource.ID)
 	}
+
+	return nil
+}
+
+func (this *PostgresEventStore) getEventSourceByStreamName(streamName string) (*EventSource, error) {
+
+	db := GetDB()
+	statement := ``
+
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	return nil, nil
 }
 
 func (this *PostgresEventStore) addEventSource(eventSource *EventSource) {
@@ -65,4 +84,7 @@ func (this *PostgresEventStore) addEventSource(eventSource *EventSource) {
 	)
 
 	return
+}
+
+func (this *PostgresEventStore) saveEvent(event DomainEvent, eventSourceID string) {
 }

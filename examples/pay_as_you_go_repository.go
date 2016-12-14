@@ -1,16 +1,18 @@
-package eventstore
+package examples
 
 import (
 	"fmt"
 	"math"
 	"reflect"
+
+	"github.com/jcarley/eventstore"
 )
 
 type PayAsYouGoRepository struct {
-	eventStore EventStore
+	eventStore eventstore.EventStore
 }
 
-func NewPayAsYouGoRepository(eventStore EventStore) *PayAsYouGoRepository {
+func NewPayAsYouGoRepository(eventStore eventstore.EventStore) *PayAsYouGoRepository {
 	return &PayAsYouGoRepository{eventStore}
 }
 
@@ -38,7 +40,7 @@ func (this *PayAsYouGoRepository) FindBy(id string) (*PayAsYouGoAccount, error) 
 	// if snapShot != nil {
 	// account = NewPayAsYouGoAccountFromSnapshot(snapShot)
 	// } else {
-	// account = NewPayAsYouGoAccount()
+	account = NewPayAsYouGoAccount()
 	// }
 	account.ID = id
 	for _, event := range stream {
