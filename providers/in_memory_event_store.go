@@ -1,4 +1,4 @@
-package examples
+package providers
 
 import "github.com/jcarley/eventstore"
 

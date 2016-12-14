@@ -6,32 +6,46 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/twinj/uuid"
 )
 
 func TestCallingApply(t *testing.T) {
 	RegisterTestingT(t)
 
-	id := uuid.NewV4().String()
+	// id := uuid.NewV4().String()
+	// eventStore := providers.NewInMemoryEventStore()
+	// repository := NewPayAsYouGoRepository(eventStore)
 
-	eventStore := NewInMemoryEventStore()
-
-	repository := NewPayAsYouGoRepository(eventStore)
-	account, _ := repository.FindBy(id)
-	fmt.Printf("%+v\n", account)
+	account := NewPayAsYouGoAccount()
+	fmt.Printf("%+v\n\n", account)
 
 	account.IncreaseCreditLine(5)
-	fmt.Printf("%+v\n", account)
+	fmt.Printf("%+v\n\n", account)
 
+	startTime, endTime := MakeCall()
+	account.CallCompleted(startTime, endTime)
+	fmt.Printf("%+v\n\n", account)
+
+	account.IncreaseCreditLine(25)
+	fmt.Printf("%+v\n\n", account)
+
+	// repository.Save(account)
+
+	fmt.Printf("%+v\n\n", account.Changes())
+	fmt.Printf("Version: %d\n\n", account.Version())
+
+	account2 := NewPayAsYouGoAccount()
+	for _, change := range account.Changes() {
+		account2.Apply(change)
+	}
+	fmt.Printf("%+v\n\n", account2)
+	fmt.Printf("Version: %d\n\n", account2.Version())
+}
+
+func MakeCall() (time.Time, time.Time) {
 	lengthOfCall, _ := time.ParseDuration("15m")
 
 	startTime := time.Now()
 	endTime := startTime.Add(lengthOfCall)
-	account.CallCompleted(startTime, endTime)
-	fmt.Printf("%+v\n", account)
 
-	repository.Save(account)
-
-	fmt.Printf("%+v\n", account.Changes())
-	fmt.Printf("Version: %d\n", account.Version())
+	return startTime, endTime
 }

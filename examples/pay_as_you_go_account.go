@@ -47,5 +47,5 @@ func (this *PayAsYouGoAccount) WhenCreditAdded(creditAdded CreditAdded) {
 
 func (this *PayAsYouGoAccount) WhenPhoneCallCharged(phoneCallCharged PhoneCallCharged) {
 	fmt.Println("PayAsYouGoAccount!WhenPhoneCallCharged")
-	this.Amount = float32(this.Amount) - phoneCallCharged.CostOfCall
+	this.Amount = this.Amount - phoneCallCharged.CostOfCall
 }
