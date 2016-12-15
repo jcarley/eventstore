@@ -7,6 +7,12 @@ import (
 	"github.com/twinj/uuid"
 )
 
+// CreateNewStream(streamName string, events []DomainEvent)
+// AppendEventsToStream(streamName string, events []DomainEvent, expectedVersion int) error
+// GetStream(streamName string, fromVersion int, toVersion int) ([]DomainEvent, error)
+// AddSnapshot(streamName string, snapShot interface{})
+// GetLatestSnapshot(streamName string) (interface{}, error)
+
 type PostgresEventStore struct {
 }
 
@@ -36,24 +42,23 @@ func (this *PostgresEventStore) AppendEventsToStream(streamName string, events [
 	}
 
 	for _, event := range events {
-		this.saveEvent(event, eventSource.ID)
+		this.saveEvent(eventSource.RegisterEvent(event))
 	}
 
 	return nil
 }
 
-func (this *PostgresEventStore) getEventSourceByStreamName(streamName string) (*eventstore.EventSource, error) {
+func (this *PostgresEventStore) getEventSourceByStreamName(streamName string) (eventSource *eventstore.EventSource, err error) {
 
 	db := eventstore.GetDB()
-	statement := ``
-
-	stmt, err := db.Prepare(statement)
-	if err != nil {
-		return nil, err
+	statement := `select id source_type version created_at updated_at
+								from event_sources where source_type = $1`
+	eventSource = &eventstore.EventSource{}
+	if err = db.Get(eventSource, statement, streamName); err != nil {
+		eventSource = nil
 	}
-	defer stmt.Close()
 
-	return nil, nil
+	return
 }
 
 func (this *PostgresEventStore) addEventSource(eventSource *eventstore.EventSource) {
@@ -79,5 +84,6 @@ func (this *PostgresEventStore) addEventSource(eventSource *eventstore.EventSour
 	return
 }
 
-func (this *PostgresEventStore) saveEvent(event eventstore.DomainEvent, eventSourceID string) {
+func (this *PostgresEventStore) saveEvent(event eventstore.EventWrapper) {
+
 }

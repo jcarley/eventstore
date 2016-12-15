@@ -7,11 +7,6 @@ import (
 	"github.com/jcarley/eventstore"
 )
 
-type AverageFunc func(nextValue int, acc float32, size int) (float32, int)
-
-func (this AverageFunc) Apply(event DomainEvent) {
-}
-
 type AverageCallDuration struct {
 	TotalCalls        int
 	CallLengthTotal   float32
