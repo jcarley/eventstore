@@ -31,7 +31,7 @@ type PostgresEventStore struct {
 }
 
 func NewPostgresEventStore() *PostgresEventStore {
-	// log.SetLevel(log.PanicLevel)
+	log.SetLevel(log.PanicLevel)
 	return &PostgresEventStore{}
 }
 

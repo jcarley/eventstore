@@ -17,23 +17,19 @@ func TestAddingNewEventStream(t *testing.T) {
 	repository := NewPayAsYouGoRepository(eventStore)
 
 	account := NewPayAsYouGoAccount()
-	fmt.Printf("%#v\n\n", account)
-
 	account.IncreaseCreditLine(5)
-	fmt.Printf("%#v\n\n", account)
-
 	startTime, endTime := MakeCall(15)
 	account.CallCompleted(startTime, endTime)
-	fmt.Printf("%#v\n\n", account)
-
 	account.IncreaseCreditLine(25)
-	fmt.Printf("%#v\n\n", account)
 
 	err := repository.Add(account)
 	if err != nil {
 		t.Error(err)
 	}
 
+	// Assert
+	Expect(len(account.Changes())).To(Equal(0), "Changes should be cleared")
+	Expect(account.Version()).To(Equal(3), "Incorrect version number")
 }
 
 func TestSavingToAnEventStream(t *testing.T) {
@@ -56,6 +52,9 @@ func TestSavingToAnEventStream(t *testing.T) {
 	account.IncreaseCreditLine(5)
 	startTime, endTime = MakeCall(35)
 	account.CallCompleted(startTime, endTime)
+
+	Expect(len(account.Changes())).To(Equal(2), "Changes should be cleared")
+
 	err = repository.Save(account)
 	if err != nil {
 		t.Error(err)
@@ -67,6 +66,7 @@ func TestSavingToAnEventStream(t *testing.T) {
 }
 
 func TestProjectionApply(t *testing.T) {
+	RegisterTestingT(t)
 
 	events := []eventstore.DomainEvent{
 		NewPhoneCallCharged(15),
@@ -84,8 +84,11 @@ func TestProjectionApply(t *testing.T) {
 		projection.Apply(event)
 	}
 
-	fmt.Printf("\nThe total calls calculated: %d\n", projection.TotalCalls)
-	fmt.Printf("Average length of call is %s minutes\n\n", projection.String())
+	actualCallLength := fmt.Sprintf("%.2f", projection.AverageCallLength)
+	expectedCallLength := "26.57"
+
+	Expect(projection.TotalCalls).To(Equal(7))
+	Expect(actualCallLength).To(Equal(expectedCallLength))
 }
 
 func NewPhoneCallCharged(lengthOfCall int) PhoneCallCharged {

@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcarley/eventstore"
@@ -41,11 +40,9 @@ func (this *PayAsYouGoAccount) Apply(change eventstore.DomainEvent) {
 }
 
 func (this *PayAsYouGoAccount) WhenCreditAdded(creditAdded CreditAdded) {
-	fmt.Println("PayAsYouGoAccount!WhenCreditAdded")
 	this.Amount += creditAdded.Amount
 }
 
 func (this *PayAsYouGoAccount) WhenPhoneCallCharged(phoneCallCharged PhoneCallCharged) {
-	fmt.Println("PayAsYouGoAccount!WhenPhoneCallCharged")
 	this.Amount = this.Amount - phoneCallCharged.CostOfCall
 }
