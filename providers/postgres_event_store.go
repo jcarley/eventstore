@@ -10,6 +10,7 @@ import (
 	"github.com/jcarley/eventstore/helper/jsonutil"
 	"github.com/jmoiron/sqlx"
 	"github.com/twinj/uuid"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var (
@@ -19,6 +20,7 @@ var (
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
 	// log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&prefixed.TextFormatter{TimestampFormat: time.RFC3339})
 
 	// Output to stderr instead of stdout, could also be a file.
 	log.SetOutput(os.Stderr)
@@ -31,7 +33,7 @@ type PostgresEventStore struct {
 }
 
 func NewPostgresEventStore() *PostgresEventStore {
-	log.SetLevel(log.PanicLevel)
+	// log.SetLevel(log.PanicLevel)
 	return &PostgresEventStore{}
 }
 
