@@ -8,20 +8,19 @@ import (
 	"github.com/jcarley/eventstore"
 	"github.com/jcarley/eventstore/providers"
 	. "github.com/onsi/gomega"
-	"github.com/twinj/uuid"
 )
 
 func TestCallingApply(t *testing.T) {
 	RegisterTestingT(t)
 
-	id := uuid.NewV4().String()
+	// id := uuid.NewV4().String()
 	// eventStore := providers.NewInMemoryEventStore()
 
 	eventStore := providers.NewPostgresEventStore()
 	repository := NewPayAsYouGoRepository(eventStore)
 
-	// account := NewPayAsYouGoAccount()
-	account := repository.FindBy(id)
+	account := NewPayAsYouGoAccount()
+	// account := repository.FindBy(id)
 	fmt.Printf("%#v\n\n", account)
 
 	account.IncreaseCreditLine(5)
@@ -34,7 +33,10 @@ func TestCallingApply(t *testing.T) {
 	account.IncreaseCreditLine(25)
 	fmt.Printf("%#v\n\n", account)
 
-	repository.Save(account)
+	err := repository.Add(account)
+	if err != nil {
+		t.Error(err)
+	}
 
 	fmt.Printf("%#v\n\n", account.Changes())
 	fmt.Printf("Version: %d\n\n", account.Version())

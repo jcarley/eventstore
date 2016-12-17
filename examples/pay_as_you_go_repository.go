@@ -50,9 +50,9 @@ func (this *PayAsYouGoRepository) FindBy(id string) (*PayAsYouGoAccount, error) 
 	return account, nil
 }
 
-func (this *PayAsYouGoRepository) Add(account *PayAsYouGoAccount) {
+func (this *PayAsYouGoRepository) Add(account *PayAsYouGoAccount) error {
 	streamName := this.StreamNameFor(account.ID)
-	this.eventStore.CreateNewStream(streamName, account.Changes())
+	return this.eventStore.CreateNewStream(streamName, account.Changes())
 }
 
 func (this *PayAsYouGoRepository) Save(account *PayAsYouGoAccount) error {
@@ -61,5 +61,5 @@ func (this *PayAsYouGoRepository) Save(account *PayAsYouGoAccount) error {
 }
 
 func (this *PayAsYouGoRepository) StreamNameFor(id string) string {
-	return fmt.Sprintf("%s-%s", reflect.TypeOf(&PayAsYouGoAccount{}).String(), id)
+	return fmt.Sprintf("%s-%s", reflect.TypeOf(&PayAsYouGoAccount{}).Elem().String(), id)
 }

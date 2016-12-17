@@ -27,8 +27,21 @@ func GetDB() *sqlx.DB {
 	return db
 }
 
-func DbTime() (createdAt time.Time, updatedAt time.Time) {
-	newTime := time.Now().UTC()
+func NewDbTime() time.Time {
+	return time.Now().UTC()
+}
+
+func NewFormattedDbTime() string {
+	t := NewDbTime()
+	return FormatDbTime(t)
+}
+
+func FormatDbTime(t time.Time) string {
+	return t.Format(time.RFC3339)
+}
+
+func TimeStamps() (createdAt time.Time, updatedAt time.Time) {
+	newTime := NewDbTime()
 	createdAt = newTime
 	updatedAt = newTime
 	return
