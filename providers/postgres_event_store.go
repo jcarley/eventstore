@@ -31,6 +31,7 @@ type PostgresEventStore struct {
 }
 
 func NewPostgresEventStore() *PostgresEventStore {
+	// log.SetLevel(log.PanicLevel)
 	return &PostgresEventStore{}
 }
 
@@ -143,6 +144,12 @@ func (this *PostgresEventStore) updateEventSource(eventSource *eventstore.EventS
 	if rowsAffected, err := result.RowsAffected(); err != nil {
 		return err
 	} else if rowsAffected == 0 {
+
+		log.WithFields(log.Fields{
+			"ID":   eventSource.ID,
+			"Type": "EventSource",
+		}).Error(NoRecordsUpdatedError.Error())
+
 		return NoRecordsUpdatedError
 	}
 

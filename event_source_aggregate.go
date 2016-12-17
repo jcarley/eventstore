@@ -25,6 +25,10 @@ func (this *Aggregate) Changes() []DomainEvent {
 	return this.changes
 }
 
+func (this *Aggregate) ClearChanges() {
+	this.changes = this.changes[0:0]
+}
+
 func (this *Aggregate) Apply(aggregate EventSourceAggregate, event DomainEvent) {
 	// eventTypeName := reflect.TypeOf(change).Name()
 	// methodName := fmt.Sprintf("When%s", eventTypeName)

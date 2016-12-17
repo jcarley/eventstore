@@ -52,12 +52,18 @@ func (this *PayAsYouGoRepository) FindBy(id string) (*PayAsYouGoAccount, error) 
 
 func (this *PayAsYouGoRepository) Add(account *PayAsYouGoAccount) error {
 	streamName := this.StreamNameFor(account.ID)
+	defer this.ClearChanges(account)
 	return this.eventStore.CreateNewStream(streamName, account.Changes())
 }
 
 func (this *PayAsYouGoRepository) Save(account *PayAsYouGoAccount) error {
 	streamName := this.StreamNameFor(account.ID)
+	defer this.ClearChanges(account)
 	return this.eventStore.AppendEventsToStream(streamName, account.Changes(), 0)
+}
+
+func (this *PayAsYouGoRepository) ClearChanges(account *PayAsYouGoAccount) {
+	account.ClearChanges()
 }
 
 func (this *PayAsYouGoRepository) StreamNameFor(id string) string {

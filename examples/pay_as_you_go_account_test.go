@@ -10,17 +10,13 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCallingApply(t *testing.T) {
+func TestAddingNewEventStream(t *testing.T) {
 	RegisterTestingT(t)
-
-	// id := uuid.NewV4().String()
-	// eventStore := providers.NewInMemoryEventStore()
 
 	eventStore := providers.NewPostgresEventStore()
 	repository := NewPayAsYouGoRepository(eventStore)
 
 	account := NewPayAsYouGoAccount()
-	// account := repository.FindBy(id)
 	fmt.Printf("%#v\n\n", account)
 
 	account.IncreaseCreditLine(5)
@@ -38,16 +34,36 @@ func TestCallingApply(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Printf("%#v\n\n", account.Changes())
-	fmt.Printf("Version: %d\n\n", account.Version())
+}
 
-	account2 := NewPayAsYouGoAccount()
-	for _, change := range account.Changes() {
-		account2.Apply(change)
+func TestSavingToAnEventStream(t *testing.T) {
+	RegisterTestingT(t)
+
+	// Arrange
+	eventStore := providers.NewPostgresEventStore()
+	repository := NewPayAsYouGoRepository(eventStore)
+	account := NewPayAsYouGoAccount()
+	account.IncreaseCreditLine(5)
+	startTime, endTime := MakeCall(15)
+	account.CallCompleted(startTime, endTime)
+	account.IncreaseCreditLine(25)
+	err := repository.Add(account)
+	if err != nil {
+		t.Error(err)
 	}
-	fmt.Printf("%#v\n\n", account2)
-	fmt.Printf("%#v\n\n", account2.Changes())
-	fmt.Printf("Version: %d\n\n", account2.Version())
+
+	// Action
+	account.IncreaseCreditLine(5)
+	startTime, endTime = MakeCall(35)
+	account.CallCompleted(startTime, endTime)
+	err = repository.Save(account)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Assert
+	Expect(len(account.Changes())).To(Equal(0), "Changes should be cleared")
+	Expect(account.Version()).To(Equal(5), "Incorrect version number")
 }
 
 func TestProjectionApply(t *testing.T) {
