@@ -30,6 +30,10 @@
 			"Rev": "dffddbcda422b88507795533be131d05e1a3dc71"
 		},
 		{
+			"ImportPath": "github.com/mgutz/ansi",
+			"Rev": "c286dcecd19ff979eeb73ea444e479b903f2cfcb"
+		},
+		{
 			"ImportPath": "github.com/onsi/gomega",
 			"Rev": "efd113280743f90026f1dc18b93ca5355d8df0bf"
 		},
@@ -61,6 +65,10 @@
 			"ImportPath": "github.com/twinj/uuid",
 			"Comment": "0.10.0-94-gb505f2c",
 			"Rev": "b505f2cca343b7b21416b27b1f2ad88469800892"
+		},
+		{
+			"ImportPath": "github.com/x-cray/logrus-prefixed-formatter",
+			"Rev": "a35e641b1da09880f6432c2c7e814ef0817663f7"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
