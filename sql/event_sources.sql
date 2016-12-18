@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : eventstore
+ Source Server         : eventsource
  Source Server Type    : PostgreSQL
  Source Server Version : 90503
  Source Host           : localhost
@@ -12,7 +12,7 @@
  Target Server Version : 90503
  File Encoding         : utf-8
 
- Date: 12/10/2016 10:37:39 AM
+ Date: 12/18/2016 09:06:51 AM
 */
 
 -- ----------------------------
@@ -21,7 +21,7 @@
 DROP TABLE IF EXISTS "public"."event_sources";
 CREATE TABLE "public"."event_sources" (
 	"id" uuid NOT NULL,
-	"source_type" varchar(255) NOT NULL COLLATE "default",
+	"stream_name" varchar(255) NOT NULL COLLATE "default",
 	"version" int4 NOT NULL,
 	"created_at" timestamp(6) NOT NULL,
 	"updated_at" timestamp(6) NOT NULL
@@ -38,4 +38,5 @@ ALTER TABLE "public"."event_sources" ADD PRIMARY KEY ("id") NOT DEFERRABLE INITI
 --  Indexes structure for table event_sources
 -- ----------------------------
 CREATE UNIQUE INDEX  "event_sources_id_key" ON "public"."event_sources" USING btree("id" "pg_catalog"."uuid_ops" ASC NULLS LAST);
+CREATE UNIQUE INDEX  "event_sources_stream_name_idx" ON "public"."event_sources" USING btree(stream_name COLLATE "default" "pg_catalog"."text_ops" ASC NULLS LAST);
 

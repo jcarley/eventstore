@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : eventstore
+ Source Server         : eventsource
  Source Server Type    : PostgreSQL
  Source Server Version : 90503
  Source Host           : localhost
@@ -12,7 +12,7 @@
  Target Server Version : 90503
  File Encoding         : utf-8
 
- Date: 12/10/2016 09:28:06 AM
+ Date: 12/18/2016 09:07:02 AM
 */
 
 -- ----------------------------
@@ -24,7 +24,7 @@ CREATE TABLE "public"."events" (
 	"time_stamp" timestamp(6) NOT NULL,
 	"name" varchar NOT NULL COLLATE "default",
 	"version" varchar NOT NULL COLLATE "default",
-	"event_source_id" uuid NOT NULL,
+	"stream_name" varchar(255) NOT NULL COLLATE "default",
 	"sequence" int8,
 	"data" json NOT NULL
 )
@@ -39,10 +39,10 @@ ALTER TABLE "public"."events" ADD PRIMARY KEY ("id") NOT DEFERRABLE INITIALLY IM
 -- ----------------------------
 --  Indexes structure for table events
 -- ----------------------------
-CREATE INDEX  "events_event_source_id_idx" ON "public"."events" USING btree(event_source_id "pg_catalog"."uuid_ops" ASC NULLS LAST);
+CREATE INDEX  "events_stream_name_idx" ON "public"."events" USING btree(stream_name COLLATE "default" "pg_catalog"."text_ops" ASC NULLS LAST);
 
 -- ----------------------------
 --  Foreign keys structure for table events
 -- ----------------------------
-ALTER TABLE "public"."events" ADD CONSTRAINT "events_event_source_id_fk" FOREIGN KEY ("event_source_id") REFERENCES "public"."event_sources" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "public"."events" ADD CONSTRAINT "events_stream_name_fk" FOREIGN KEY ("stream_name") REFERENCES "public"."event_sources" ("stream_name") ON UPDATE NO ACTION ON DELETE NO ACTION NOT DEFERRABLE INITIALLY IMMEDIATE;
 
