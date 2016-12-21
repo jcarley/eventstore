@@ -18,7 +18,6 @@
 -- ----------------------------
 --  Table structure for snapshots
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."snapshots";
 CREATE TABLE "public"."snapshots" (
 	"event_source_id" uuid NOT NULL,
 	"version" int8,

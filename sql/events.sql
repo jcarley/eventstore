@@ -18,12 +18,11 @@
 -- ----------------------------
 --  Table structure for events
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."events";
 CREATE TABLE "public"."events" (
 	"id" uuid NOT NULL,
 	"time_stamp" timestamp(6) NOT NULL,
 	"name" varchar NOT NULL COLLATE "default",
-	"version" varchar NOT NULL COLLATE "default",
+	"version" int8,
 	"stream_name" varchar(255) NOT NULL COLLATE "default",
 	"sequence" int8,
 	"data" json NOT NULL

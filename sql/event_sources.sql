@@ -18,7 +18,6 @@
 -- ----------------------------
 --  Table structure for event_sources
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."event_sources";
 CREATE TABLE "public"."event_sources" (
 	"id" uuid NOT NULL,
 	"stream_name" varchar(255) NOT NULL COLLATE "default",
