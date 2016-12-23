@@ -2,6 +2,10 @@ package examples
 
 import "github.com/jcarley/eventstore"
 
+func init() {
+	eventstore.RegisterType((*PhoneCallCharged)(nil))
+}
+
 type PhoneCallChargedTarget interface {
 	WhenPhoneCallCharged(PhoneCallCharged)
 }

@@ -2,6 +2,10 @@ package examples
 
 import "github.com/jcarley/eventstore"
 
+func init() {
+	eventstore.RegisterType((*CreditAdded)(nil))
+}
+
 type CreditAddedTarget interface {
 	WhenCreditAdded(CreditAdded)
 }

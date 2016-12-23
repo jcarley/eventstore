@@ -91,6 +91,38 @@ func TestProjectionApply(t *testing.T) {
 	Expect(actualCallLength).To(Equal(expectedCallLength))
 }
 
+func TestGetStream(t *testing.T) {
+	RegisterTestingT(t)
+
+	eventStore := providers.NewPostgresEventStore()
+	repository := NewPayAsYouGoRepository(eventStore)
+
+	account := NewPayAsYouGoAccount()
+	account.IncreaseCreditLine(5)
+	startTime, endTime := MakeCall(15)
+	account.CallCompleted(startTime, endTime)
+	account.IncreaseCreditLine(25)
+
+	err := repository.Add(account)
+	if err != nil {
+		t.Error(err)
+	}
+
+	id := account.ID
+	fmt.Println(id)
+
+	account2, err := repository.FindBy(id)
+
+	if err != nil {
+		fmt.Println("Error")
+		fmt.Println(err)
+	}
+
+	fmt.Println("====================================")
+	fmt.Printf("%#v\n", account2)
+	fmt.Println("====================================")
+}
+
 func NewPhoneCallCharged(lengthOfCall int) PhoneCallCharged {
 	startTime, endTime := MakeCall(lengthOfCall)
 	costOfCall := float32(lengthOfCall) * 0.10

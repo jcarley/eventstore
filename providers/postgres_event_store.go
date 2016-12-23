@@ -7,7 +7,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/jcarley/eventstore"
-	"github.com/jcarley/eventstore/helper/jsonutil"
 	"github.com/jmoiron/sqlx"
 	"github.com/twinj/uuid"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -78,7 +77,23 @@ func (this *PostgresEventStore) AppendEventsToStream(streamName string, events [
 }
 
 func (this *PostgresEventStore) GetStream(streamName string, fromVersion int, toVersion int) ([]eventstore.DomainEvent, error) {
-	return nil, nil
+
+	db := eventstore.GetDB()
+	events, err := this.getEventStream(streamName, fromVersion, toVersion, db)
+	if err != nil {
+		return nil, err
+	}
+
+	size := len(events)
+	domainEvents := make([]eventstore.DomainEvent, size, size)
+	for _, event := range events {
+		domainEvent, err := event.Unwrap()
+		if err != nil {
+		}
+		domainEvents = append(domainEvents, domainEvent)
+	}
+
+	return domainEvents, nil
 }
 
 func (this *PostgresEventStore) AddSnapshot(streamName string, snapShot interface{}) {
@@ -91,8 +106,9 @@ func (this *PostgresEventStore) GetLatestSnapshot(streamName string) (interface{
 func (this *PostgresEventStore) getEventSourceByStreamName(streamName string) (eventSource *eventstore.EventSource, err error) {
 
 	db := eventstore.GetDB()
-	statement := `select id, source_type, version, created_at, updated_at
-								from event_sources where source_type = $1`
+	statement := `select id, stream_name, version, created_at, updated_at
+								from event_sources where stream_name = $1`
+
 	eventSource = &eventstore.EventSource{}
 	if err = db.Get(eventSource, statement, streamName); err != nil {
 		eventSource = nil
@@ -103,18 +119,18 @@ func (this *PostgresEventStore) getEventSourceByStreamName(streamName string) (e
 
 func (this *PostgresEventStore) addEventSource(eventSource *eventstore.EventSource, tx *sqlx.Tx) error {
 
-	statement := `insert into event_sources (id, source_type, version, created_at, updated_at)
+	statement := `insert into event_sources (id, stream_name, version, created_at, updated_at)
 								values ($1, $2, $3, $4, $5)`
 
 	log.WithFields(log.Fields{
-		"ID":      eventSource.ID,
-		"Version": eventSource.Version,
-		"Source":  eventSource.SourceType,
+		"ID":         eventSource.ID,
+		"Version":    eventSource.Version,
+		"StreamName": eventSource.StreamName,
 	}).Info("Adding Event Source")
 
 	tx.MustExec(statement,
 		eventSource.ID,
-		eventSource.SourceType,
+		eventSource.StreamName,
 		eventSource.Version,
 		eventSource.CreatedAt.Format(time.RFC3339),
 		eventSource.UpdatedAt.Format(time.RFC3339),
@@ -158,12 +174,29 @@ func (this *PostgresEventStore) updateEventSource(eventSource *eventstore.EventS
 	return nil
 }
 
+func (this *PostgresEventStore) getEventStream(streamName string, fromVersion int, toVersion int, db *sqlx.DB) ([]eventstore.EventWrapper, error) {
+
+	statement := `SELECT ID, NAME, stream_name, VERSION, "sequence", time_stamp, "data"
+								FROM events
+								WHERE events.stream_name = $1
+									AND events."version" > $2
+									AND events."version" <= $3
+								ORDER BY events."sequence"`
+
+	events := []eventstore.EventWrapper{}
+	err := db.Select(&events, statement, streamName, fromVersion, toVersion)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
 func (this *PostgresEventStore) saveEvent(event *eventstore.EventWrapper, tx *sqlx.Tx) error {
 
-	statement := `insert into events (id, time_stamp, name, version, event_source_id, sequence, data)
+	statement := `insert into events (id, time_stamp, name, version, stream_name, sequence, data)
 							  values ($1, $2, $3, $4, $5, $6, $7)`
-
-	data, _ := jsonutil.EncodeJSONToString(event.Event)
 
 	log.WithFields(log.Fields{
 		"ID":       event.ID,
@@ -177,9 +210,9 @@ func (this *PostgresEventStore) saveEvent(event *eventstore.EventWrapper, tx *sq
 		eventstore.NewFormattedDbTime(),
 		event.Name,
 		event.EventNumber,
-		event.EventSourceId,
+		event.StreamName,
 		event.Sequence,
-		data,
+		event.Event,
 	)
 
 	return nil
